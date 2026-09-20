@@ -29,4 +29,5 @@ export OPENCODE_SERVER_PASSWORD=${SECRET_PASSWORD}
 export XDG_DATA_HOME=/workspace/.opencode-data
 export XDG_CONFIG_HOME=/workspace/.opencode-data
 
-opencode serve /workspace
+cd /workspace
+opencode serve
