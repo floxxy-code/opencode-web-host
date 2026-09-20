@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 1. configure Rclone for Backblaze B2
+# Configure Rclone for Backblaze B2
 mkdir -p ~/.config/rclone
 cat <<EOF > ~/.config/rclone/rclone.conf
 [b2_storage]
@@ -14,7 +14,6 @@ EOF
 echo "Pulling latest project files from Backblaze B2..."
 rclone sync b2_storage:${B2_BUCKET_NAME} /workspace --verbose
 
-# 2. Background loop: Every 3 minutes, backup changes back to B2 automatically
 (
   while true; do
     sleep 180
@@ -23,12 +22,10 @@ rclone sync b2_storage:${B2_BUCKET_NAME} /workspace --verbose
   done
 ) &
 
-# 3. Create the Network Proxy Tunnel
-# This intercepts Render's public requests on port 10000 and tunnels them directly into OpenCode on 127.0.0.1:4096
-echo "Starting network proxy tunnel (10000 -> 4096)..."
-socat TCP-LISTEN:10000,fork TCP:127.0.0.1:4096 &
 
-# 4. Boot up the OpenCode Web interface server
+echo "Starting smart proxy layer..."
+node /proxy.js &
+
 echo "Starting OpenCode Web..."
 export OPENCODE_SERVER_PASSWORD=${SECRET_PASSWORD}
 opencode serve
