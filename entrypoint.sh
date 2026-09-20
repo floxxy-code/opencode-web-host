@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Configure Rclone for Backblaze B2
 mkdir -p ~/.config/rclone
 cat <<EOF > ~/.config/rclone/rclone.conf
 [b2_storage]
@@ -22,10 +21,12 @@ rclone sync b2_storage:${B2_BUCKET_NAME} /workspace --verbose
   done
 ) &
 
-
 echo "Starting smart proxy layer..."
 node /proxy.js &
 
 echo "Starting OpenCode Web..."
 export OPENCODE_SERVER_PASSWORD=${SECRET_PASSWORD}
-opencode serve
+export XDG_DATA_HOME=/workspace/.opencode-data
+export XDG_CONFIG_HOME=/workspace/.opencode-data
+
+opencode serve /workspace
