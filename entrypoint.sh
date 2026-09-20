@@ -25,4 +25,4 @@ rclone sync b2_storage:${B2_BUCKET_NAME} /workspace --verbose
 
 echo " Starting OpenCode Web..."
 export OPENCODE_SERVER_PASSWORD=${SECRET_PASSWORD}
-opencode web --host 0.0.0.0 --port 5173
+opencode serve
