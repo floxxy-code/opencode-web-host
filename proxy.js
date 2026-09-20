@@ -1,8 +1,8 @@
 const http = require('http');
-const httpProxy = require('http-proxy');
 
-
-const proxy = httpProxy.createProxyServer({});
+const TARGET_HOST = '127.0.0.1';
+const TARGET_PORT = 4096;
+const PROXY_PORT = 10000;
 
 const server = http.createServer((req, res) => {
   if (req.url === '/ping') {
@@ -11,11 +11,24 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  proxy.web(req, res, { target: 'http://127.0.0.1:4096' }, (err) => {
-    res.writeHead(502, { 'Content-Type': 'text/plain' });
-    res.end('Bad Gateway: OpenCode server is starting up or unreachable.');
+  const proxyReq = http.request({
+    host: TARGET_HOST,
+    port: TARGET_PORT,
+    path: req.url,
+    method: req.method,
+    headers: req.headers
+  }, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res, { end: true });
   });
+
+  proxyReq.on('error', (err) => {
+    res.writeHead(502, { 'Content-Type': 'text/plain' });
+    res.end('Bad Gateway: OpenCode server is booting or unreachable.');
+  });
+
+  req.pipe(proxyReq, { end: true });
 });
 
-console.log('Smart Proxy running on port 10000...');
-server.listen(10000, '0.0.0.0');
+console.log(`Native Proxy running on port ${PROXY_PORT}...`);
+server.listen(PROXY_PORT, '0.0.0.0');
